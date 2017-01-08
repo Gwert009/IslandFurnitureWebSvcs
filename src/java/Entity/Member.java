@@ -1,14 +1,13 @@
-
 package Entity;
 
 import java.util.ArrayList;
 
 public class Member {
+
     private Long id;
     private String name;
     private String email;
     private Integer loyaltyPoints;
-    private ArrayList<String> wishList;
     private Double cumulativeSpending;
     private String phone;
     private String address;
@@ -17,6 +16,26 @@ public class Member {
     private String securityAnswer;
     private Integer age;
     private Integer income;
+
+    public Member() {
+    }
+
+    public Member(Long id, String name, String email, Integer loyaltyPoints, Double cumulativeSpending, String phone, String address, String city, Integer securityQuestion, String securityAnswer, Integer age, Integer income) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.loyaltyPoints = loyaltyPoints;
+        this.cumulativeSpending = cumulativeSpending;
+        this.phone = phone;
+        this.address = address;
+        this.city = city;
+        this.securityQuestion = securityQuestion;
+        this.securityAnswer = securityAnswer;
+        this.age = age;
+        this.income = income;
+    }
+    
+    
 
     public Long getId() {
         return id;
@@ -81,8 +100,6 @@ public class Member {
     public void setIncome(Integer income) {
         this.income = income;
     }
-    
-    
 
     public String getName() {
         return name;
@@ -108,14 +125,6 @@ public class Member {
         this.loyaltyPoints = loyaltyPoints;
     }
 
-    public ArrayList<String> getWishList() {
-        return wishList;
-    }
-
-    public void setWishList(ArrayList<String> wishList) {
-        this.wishList = wishList;
-    }
-
     public Double getCumulativeSpending() {
         return cumulativeSpending;
     }
@@ -123,6 +132,5 @@ public class Member {
     public void setCumulativeSpending(Double cumulativeSpending) {
         this.cumulativeSpending = cumulativeSpending;
     }
-    
-    
+
 }
