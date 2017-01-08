@@ -33,6 +33,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -106,6 +107,109 @@ public class MemberentityFacadeREST extends AbstractFacade<Memberentity> {
                 System.out.println("Login credentials provided were incorrect, password wrong.");
                 return Response.status(Response.Status.UNAUTHORIZED).build();
             }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+    }
+    
+    //function used in ECommerce_GetMember
+    @GET
+    @Path("getMember")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response getMember(@QueryParam("memberEmail") String memberEmail) {
+        try {
+            
+            System.out.println("getMember GET called");
+            
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/islandfurniture-it07?zeroDateTimeBehavior=convertToNull&user=root&password=12345");
+            String stmt = "SELECT * FROM memberentity m WHERE m.EMAIL=?";
+            
+            PreparedStatement ps = conn.prepareStatement(stmt);
+            ps.setString(1, memberEmail);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            
+            //Member m = get(memberEmail);
+            
+            Member m = new Member();
+            
+            m.setId(rs.getLong("ID"));
+            m.setName(rs.getString("NAME"));
+            m.setEmail(rs.getString("EMAIL"));
+            m.setLoyaltyPoints(rs.getInt("LOYALTYPOINTS"));
+            //m.setWishList((ArrayList<String>) rs.getArray("??"));
+            m.setCumulativeSpending(rs.getDouble("CUMULATIVESPENDING"));
+            m.setPhone(rs.getString("PHONE"));
+            m.setAddress(rs.getString("ADDRESS"));
+            m.setCity(rs.getString("CITY"));
+            m.setSecurityQuestion(rs.getInt("SECURITYQUESTION"));
+            m.setSecurityAnswer(rs.getString("SECURITYANSWER"));
+            m.setAge(rs.getInt("AGE"));
+            m.setIncome(rs.getInt("INCOME"));
+            
+            GenericEntity<Member> entity = new GenericEntity<Member>(m) {};
+        
+            return Response.status(200).entity(entity).build();
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+    }
+    
+    //function used in ECommerce_MemberEditProfileServlet
+    @POST
+    @Path("postMember")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response postMember(@QueryParam("email") String email, 
+            @QueryParam("name") String name, @QueryParam("phone") String phone,
+            @QueryParam("address") String address, @QueryParam("securityAnswer") String securityAnswer, 
+            @QueryParam("securityQuestion") Integer securityQuestion, @QueryParam("age") Integer age,
+            @QueryParam("income") Integer income, @QueryParam("password") String password) {
+        try {
+            
+            System.out.println("postMember POST called");
+            
+            Connection conn_g = DriverManager.getConnection("jdbc:mysql://localhost:3306/islandfurniture-it07?zeroDateTimeBehavior=convertToNull&user=root&password=12345");
+            String stmt_g = "SELECT * FROM memberentity m WHERE m.EMAIL=?";
+            
+            PreparedStatement ps_g = conn_g.prepareStatement(stmt_g);
+            ps_g.setString(1, email);
+            ResultSet rs = ps_g.executeQuery();
+            rs.next();
+            
+            String passwordSalt = rs.getString("PASSWORDSALT");
+            String passwordHash = generatePasswordHash(passwordSalt, password);
+            
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/islandfurniture-it07?zeroDateTimeBehavior=convertToNull&user=root&password=12345");
+            String stmt = "UPDATE memberentity m " +
+                "SET name=? ," +
+                "phone=? ," +
+                "address=? ," +
+                "securityanswer=? ," +
+                "securityquestion=? ," +
+                "age=? ," +
+                "income=? ," +
+                "passwordhash=?  " +
+                "where id=?";
+            
+            PreparedStatement ps = conn.prepareStatement(stmt);
+            ps.setString(1, name);
+            ps.setString(2, phone);
+            ps.setString(3, address);
+            ps.setString(4, securityAnswer);
+            ps.setInt(5, securityQuestion);
+            ps.setInt(6, age);
+            ps.setInt(7, income);
+            ps.setString(8, passwordHash);
+            ps.setLong(9, rs.getLong("ID"));
+            ps.executeUpdate();
+            
+            return Response.status(200).build();
+            
         } catch (Exception ex) {
             ex.printStackTrace();
             return Response.status(Response.Status.UNAUTHORIZED).build();
