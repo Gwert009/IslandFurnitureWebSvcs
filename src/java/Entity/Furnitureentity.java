@@ -101,4 +101,6 @@ public class Furnitureentity implements Serializable {
         return "Entity.Furnitureentity[ id=" + id + " ]";
     }
     
+   
+    
 }

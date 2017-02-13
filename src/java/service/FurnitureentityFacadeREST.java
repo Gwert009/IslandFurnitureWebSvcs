@@ -124,6 +124,7 @@ public class FurnitureentityFacadeREST extends AbstractFacade<Furnitureentity> {
             }
             GenericEntity<List<Furniture>> entity = new GenericEntity<List<Furniture>>(list) {
             };
+            conn.close();
             return Response
                     .status(200)
                     .header("Access-Control-Allow-Origin", "*")
@@ -183,6 +184,7 @@ public class FurnitureentityFacadeREST extends AbstractFacade<Furnitureentity> {
             }
             GenericEntity<List<Furniture>> entity = new GenericEntity<List<Furniture>>(list) {
             };
+            conn.close();
             return Response
                     .status(200)
                     .header("Access-Control-Allow-Origin", "*")
@@ -192,6 +194,54 @@ public class FurnitureentityFacadeREST extends AbstractFacade<Furnitureentity> {
                     .header("Access-Control-Max-Age", "1209600")
                     .entity(entity)
                     .build();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+    }
+    
+    //this function is used in the PaymentServlet
+    @POST
+    @Path("updateFurnitureQty")
+    @Produces("application/json")
+    public Response updateFurnitureQty(@QueryParam("SKU") String SKU, @QueryParam("qty") int qty, @QueryParam("storeID") Long storeID) {
+        System.out.println("RESTful: updateFurnitureQty() called with SKU " + SKU + " and qty " + qty);
+
+        try {
+            List<Furniture> list = new ArrayList<>();
+            String stmt = "";
+            PreparedStatement ps;
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/islandfurniture-it07?zeroDateTimeBehavior=convertToNull&user=root&password=12345");
+            
+            stmt = "UPDATE storeentity s, warehouseentity w, storagebinentity sb, storagebinentity_lineitementity sbli, lineitementity l, itementity i SET l.QUANTITY = ? WHERE s.WAREHOUSE_ID=w.ID and w.ID=sb.WAREHOUSE_ID and sb.ID=sbli.StorageBinEntity_ID and sbli.lineItems_ID=l.ID and l.ITEM_ID=i.ID and s.ID=? and i.SKU=?";
+            ps = conn.prepareStatement(stmt);
+            ps.setLong(2, storeID);
+            ps.setString(3, SKU);
+            ps.setInt(1, qty);
+
+            ps.executeUpdate();
+            
+            Connection conn2 = DriverManager.getConnection("jdbc:mysql://localhost:3306/islandfurniture-it07?zeroDateTimeBehavior=convertToNull&user=root&password=12345");
+            String stmt2 = "SELECT l.ID as id FROM storeentity s, warehouseentity w, storagebinentity sb, storagebinentity_lineitementity sbli, lineitementity l, itementity i where s.WAREHOUSE_ID=w.ID and w.ID=sb.WAREHOUSE_ID and sb.ID=sbli.StorageBinEntity_ID and sbli.lineItems_ID=l.ID and l.ITEM_ID=i.ID and s.ID=? and i.SKU=?";
+            PreparedStatement ps2 = conn.prepareStatement(stmt2);
+            ps2.setLong(1, storeID);
+            ps2.setString(2, SKU);
+            ResultSet rs = ps2.executeQuery();
+            int id = 0;
+            if (rs.next()) {
+                id = rs.getInt("id");
+            }
+            
+            
+            GenericEntity<String> entity = new GenericEntity<String>(""+id) {
+            };
+            
+            conn.close();
+            conn2.close();
+            
+            return Response.status(200).entity(entity).build();
+
+            
         } catch (Exception ex) {
             ex.printStackTrace();
             return Response.status(Response.Status.NOT_FOUND).build();

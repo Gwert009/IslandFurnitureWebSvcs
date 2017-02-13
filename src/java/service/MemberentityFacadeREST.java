@@ -159,6 +159,11 @@ public class MemberentityFacadeREST extends AbstractFacade<Memberentity> {
         }
     }
     
+   
+    
+    
+    
+    
     //function used in ECommerce_MemberEditProfileServlet
     @POST
     @Path("postMember")
@@ -321,5 +326,8 @@ public class MemberentityFacadeREST extends AbstractFacade<Memberentity> {
     protected EntityManager getEntityManager() {
         return em;
     }
+ 
+    
+    
 
 }
